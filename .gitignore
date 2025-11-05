@@ -62,5 +62,10 @@ coverage/
 SecurePaymentsAPI/securepay.db
 SecurePaymentsAPI/secure-payments.db
 SecurePaymentsAPI/.env
+SecurePaymentsAPI/certs/
 SecurePaymentsFrontend/dist/
+
+# Duplicate/backup lock files
+**/package-lock-*.json
+!package-lock.json
 
