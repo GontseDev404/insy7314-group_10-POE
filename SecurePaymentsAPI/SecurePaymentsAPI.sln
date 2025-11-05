@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36518.9 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "SecurePaymentsAPI", "SecurePaymentsAPI.esproj", "{D73F78CE-86BA-D561-F3A8-FEACF3F3AA0F}"
+EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "SecurePaymentsFrontend", "..\SecurePaymentsFrontend\", "{05642021-9CE6-293F-7BFA-29272895C7FE}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.8"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_56532"
+		Debug.AspNetCompiler.PhysicalPath = "..\SecurePaymentsFrontend\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_56532\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_56532"
+		Release.AspNetCompiler.PhysicalPath = "..\SecurePaymentsFrontend\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_56532\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "56532"
+		SlnRelativePath = "..\SecurePaymentsFrontend\"
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D73F78CE-86BA-D561-F3A8-FEACF3F3AA0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D73F78CE-86BA-D561-F3A8-FEACF3F3AA0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D73F78CE-86BA-D561-F3A8-FEACF3F3AA0F}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{D73F78CE-86BA-D561-F3A8-FEACF3F3AA0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D73F78CE-86BA-D561-F3A8-FEACF3F3AA0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D73F78CE-86BA-D561-F3A8-FEACF3F3AA0F}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{05642021-9CE6-293F-7BFA-29272895C7FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05642021-9CE6-293F-7BFA-29272895C7FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05642021-9CE6-293F-7BFA-29272895C7FE}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{05642021-9CE6-293F-7BFA-29272895C7FE}.Release|Any CPU.Build.0 = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {70BCDB6B-EA0A-4A91-BDD8-B792C526F8C5}
+	EndGlobalSection
+EndGlobal
