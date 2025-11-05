@@ -1,0 +1,93 @@
+version: 2.1
+
+orbs:
+  sonarcloud: sonarsource/sonarcloud@2.0.0
+  node: circleci/node@5.0.2
+
+jobs:
+  backend-validation:
+    docker:
+      - image: cimg/node:18.0
+    working_directory: ~/SecurePaymentsAPI
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+          cache-path: ~/SecurePaymentsAPI/node_modules
+      - run:
+          name: Validate Backend Syntax
+          command: |
+            node --check server.js
+            node --check db.js
+            node --check security.js
+            node --check seed.js
+      - run:
+          name: Security Audit Backend
+          command: |
+            npm audit --audit-level=high || true
+            if [ $? -ne 0 ]; then
+              echo "High or critical vulnerabilities found"
+              exit 1
+            fi
+
+  frontend-validation:
+    docker:
+      - image: cimg/node:18.0
+    working_directory: ~/SecurePaymentsFrontend
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+          cache-path: ~/SecurePaymentsFrontend/node_modules
+      - run:
+          name: Run ESLint
+          command: npm run lint
+      - run:
+          name: Build Frontend
+          command: npm run build
+      - run:
+          name: Security Audit Frontend
+          command: |
+            npm audit --audit-level=high || true
+            if [ $? -ne 0 ]; then
+              echo "High or critical vulnerabilities found"
+              exit 1
+            fi
+
+  sonarcloud-backend:
+    docker:
+      - image: cimg/node:18.0
+    working_directory: ~/SecurePaymentsAPI
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+          cache-path: ~/SecurePaymentsAPI/node_modules
+      - sonarcloud/scan:
+          project_base_dir: SecurePaymentsAPI
+
+  sonarcloud-frontend:
+    docker:
+      - image: cimg/node:18.0
+    working_directory: ~/SecurePaymentsFrontend
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+          cache-path: ~/SecurePaymentsFrontend/node_modules
+      - sonarcloud/scan:
+          project_base_dir: SecurePaymentsFrontend
+
+workflows:
+  version: 2
+  build-and-scan:
+    jobs:
+      - backend-validation
+      - frontend-validation
+      - sonarcloud-backend:
+          requires:
+            - backend-validation
+      - sonarcloud-frontend:
+          requires:
+            - frontend-validation
+

@@ -107,7 +107,6 @@ function requireAuth(req, res, next) {
 const sanitizeInput = (req, res, next) => {
     // Trim whitespace from string fields
     if (req.body.email) req.body.email = req.body.email.trim();
-    if (req.body.fullName) req.body.fullName = req.body.fullName.trim();
     if (req.body.password) req.body.password = req.body.password.trim();
     if (req.body.beneficiaryName) req.body.beneficiaryName = req.body.beneficiaryName.trim();
     if (req.body.swift) req.body.swift = req.body.swift.trim().toUpperCase();
@@ -118,12 +117,6 @@ const sanitizeInput = (req, res, next) => {
 };
 
 //Validation Rules 
-const registerRules = [
-    body("email").matches(patterns.email),
-    body("fullName").matches(patterns.fullName),
-    body("password").matches(patterns.password)
-];
-
 const loginRules = [
     body("email").matches(patterns.email),
     body("password").isString().isLength({ min: 1 })
@@ -138,38 +131,6 @@ const paymentRules = [
 ];
 
 //ROUTES 
-
-// Register a new user
-app.post("/api/register", sanitizeInput, registerRules, async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ error: "Validation failed", details: errors.array() });
-    }
-
-    const db = await dbPromise;
-    const { email, fullName, password } = req.body;
-
-    const existing = await db.get("SELECT * FROM users WHERE email = ?", email);
-    if (existing) {
-        return res.status(409).json({ error: "Email already registered" });
-    }
-
-    const hash = await bcrypt.hash(password, 12);
-    await db.run(
-        "INSERT INTO users (email, full_name, password_hash, created_at) VALUES (?, ?, ?, datetime('now'))",
-        email,
-        fullName,
-        hash
-    );
-
-    logSecurityEvent("USER_REGISTRATION", {
-        email,
-        ip: getClientIP(req),
-        success: true
-    });
-
-    res.status(201).json({ ok: true });
-});
 
 // Login an existing user
 app.post("/api/login", sanitizeInput, loginRules, async (req, res) => {
