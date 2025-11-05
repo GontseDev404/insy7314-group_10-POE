@@ -216,47 +216,95 @@ The CircleCI pipeline (`.circleci/config.yml`) performs the following checks:
 
 2. **Configure Environment Variables**
    In CircleCI project settings, add the following environment variables:
-   - `SONAR_TOKEN`: Your SonarCloud token (get from [SonarCloud](https://sonarcloud.io/))
+   - `SONAR_HOST_URL`: Your SonarQube server URL (e.g., `http://your-sonarqube-server:9000` or `https://sonar.yourcompany.com`)
+   - `SONAR_TOKEN`: Your SonarQube authentication token (see SonarQube setup below)
 
 3. **Push to Trigger Pipeline**
    - The pipeline will automatically run on every push to `main` or `master` branch
    - View results in the CircleCI dashboard
 
-### Setting Up SonarQube
+### Setting Up Self-Hosted SonarQube
 
-#### Option 1: SonarCloud (Recommended - Free Tier Available)
+This project is configured for **self-hosted SonarQube**. Follow these steps to set it up:
 
-1. **Create SonarCloud Account**
-   - Go to [SonarCloud](https://sonarcloud.io/)
-   - Sign in with GitHub
-   - Create a new organization (free tier available)
+#### Step 1: Install SonarQube Server
+
+1. **Download and Install**
+   - Download SonarQube from [SonarQube Downloads](https://www.sonarsource.com/products/sonarqube/downloads/)
+   - Extract to your desired location (e.g., `/opt/sonarqube`)
+   - Follow the [installation guide](https://docs.sonarqube.org/latest/setup/install-server/)
+
+2. **Database Setup** (Required)
+   - SonarQube requires PostgreSQL, MySQL, Oracle, or Microsoft SQL Server
+   - **Do NOT use H2 database** (only for testing, not production)
+   - Configure database connection in `conf/sonar.properties`:
+     ```properties
+     sonar.jdbc.url=jdbc:postgresql://localhost/sonar
+     sonar.jdbc.username=sonar
+     sonar.jdbc.password=your-password
+     ```
+
+3. **Start SonarQube**
+   - Linux: `./bin/linux-x86-64/sonar.sh start`
+   - Windows: `StartSonar.bat`
+   - Access at: `http://localhost:9000` (default port)
+
+#### Step 2: Configure SonarQube
+
+1. **Initial Setup**
+   - Open `http://your-sonarqube-server:9000` in a browser
+   - Default credentials: `admin` / `admin` (change on first login!)
+   - Create an organization (optional, for multi-tenant setup)
 
 2. **Create Projects**
-   - Create two projects:
-     - `secure-payments-api` (for backend)
-     - `secure-payments-frontend` (for frontend)
-   - Note the project keys (used in `sonar-project.properties`)
+   - Projects will be auto-created on first scan, OR
+   - Manually create projects in SonarQube UI:
+     - Project key: `secure-payments-api` (for backend)
+     - Project key: `secure-payments-frontend` (for frontend)
 
-3. **Generate Token**
-   - Go to Account > Security
-   - Generate a new token
-   - Add it as `SONAR_TOKEN` in CircleCI environment variables
+3. **Generate Authentication Token**
+   - Log in to SonarQube
+   - Go to: **My Account > Security**
+   - Generate a new token (name it: `CircleCI`)
+   - **Copy and save the token** (you won't see it again!)
 
-4. **Configure Project Properties**
+#### Step 3: Configure CircleCI
+
+1. **Add Environment Variables**
+   - Go to CircleCI project settings
+   - Navigate to **Environment Variables**
+   - Add the following:
+     - **Name:** `SONAR_HOST_URL`
+       - **Value:** Your SonarQube server URL (e.g., `http://your-server:9000` or `https://sonar.yourcompany.com`)
+     - **Name:** `SONAR_TOKEN`
+       - **Value:** The token you generated in Step 2.3
+
+2. **Network Access**
+   - Ensure CircleCI can reach your SonarQube server
+   - If SonarQube is behind a firewall, configure:
+     - VPN access, or
+     - Whitelist CircleCI IP ranges, or
+     - Use a reverse proxy with SSL
+
+#### Step 4: Verify Configuration
+
+1. **Check Project Properties**
    - Backend: `SecurePaymentsAPI/sonar-project.properties`
    - Frontend: `SecurePaymentsFrontend/sonar-project.properties`
-   - Ensure project keys match your SonarCloud projects
+   - The `sonar.host.url` will use the `SONAR_HOST_URL` environment variable from CircleCI
 
-#### Option 2: Self-Hosted SonarQube
+2. **Test Pipeline**
+   - Push a commit to trigger the pipeline
+   - Check CircleCI logs for SonarQube scan results
+   - Verify scans appear in your SonarQube dashboard
 
-1. **Install SonarQube Server**
-   - Follow [SonarQube installation guide](https://docs.sonarqube.org/latest/setup/install-server/)
-   - Configure your SonarQube instance
+#### Alternative: SonarCloud (If You Prefer Cloud)
 
-2. **Update Configuration**
-   - Update `sonar.host.url` in both `sonar-project.properties` files
-   - Configure authentication tokens
-   - Update CircleCI config if needed
+If you prefer to use SonarCloud instead:
+
+1. Change `sonar.host.url` in both `sonar-project.properties` files to `https://sonarcloud.io`
+2. Use the SonarCloud orb in CircleCI (revert to SonarCloud configuration)
+3. Follow SonarCloud setup instructions (create account, generate token, etc.)
 
 ### Viewing Pipeline Results
 
@@ -267,8 +315,8 @@ The CircleCI pipeline (`.circleci/config.yml`) performs the following checks:
 - Click on any job to see detailed logs
 
 **SonarQube:**
-- Go to your SonarCloud/SonarQube instance
-- Navigate to your projects
+- Go to your self-hosted SonarQube instance (URL set in `SONAR_HOST_URL`)
+- Navigate to your projects (`secure-payments-api` and `secure-payments-frontend`)
 - View code quality metrics, hotspots, and code smells
 
 ### Local Testing

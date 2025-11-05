@@ -1,7 +1,6 @@
 version: 2.1
 
 orbs:
-  sonarcloud: sonarsource/sonarcloud@2.0.0
   node: circleci/node@5.0.2
 
 jobs:
@@ -54,7 +53,7 @@ jobs:
               exit 1
             fi
 
-  sonarcloud-backend:
+  sonarqube-backend:
     docker:
       - image: cimg/node:18.0
     working_directory: ~/SecurePaymentsAPI
@@ -63,10 +62,25 @@ jobs:
       - node/install-packages:
           pkg-manager: npm
           cache-path: ~/SecurePaymentsAPI/node_modules
-      - sonarcloud/scan:
-          project_base_dir: SecurePaymentsAPI
+      - run:
+          name: Install SonarQube Scanner
+          command: |
+            wget -q https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+            unzip -q sonar-scanner-cli-5.0.1.3006-linux.zip
+            export PATH=$PATH:$(pwd)/sonar-scanner-5.0.1.3006-linux/bin
+            echo 'export PATH=$PATH:'$(pwd)/sonar-scanner-5.0.1.3006-linux/bin >> $BASH_ENV
+      - run:
+          name: Run SonarQube Scan (Backend)
+          command: |
+            cd SecurePaymentsAPI
+            sonar-scanner \
+              -Dsonar.host.url=$SONAR_HOST_URL \
+              -Dsonar.login=$SONAR_TOKEN \
+              -Dsonar.projectKey=secure-payments-api \
+              -Dsonar.projectName="Secure Payments API" \
+              -Dsonar.projectVersion=1.0.0
 
-  sonarcloud-frontend:
+  sonarqube-frontend:
     docker:
       - image: cimg/node:18.0
     working_directory: ~/SecurePaymentsFrontend
@@ -75,8 +89,23 @@ jobs:
       - node/install-packages:
           pkg-manager: npm
           cache-path: ~/SecurePaymentsFrontend/node_modules
-      - sonarcloud/scan:
-          project_base_dir: SecurePaymentsFrontend
+      - run:
+          name: Install SonarQube Scanner
+          command: |
+            wget -q https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+            unzip -q sonar-scanner-cli-5.0.1.3006-linux.zip
+            export PATH=$PATH:$(pwd)/sonar-scanner-5.0.1.3006-linux/bin
+            echo 'export PATH=$PATH:'$(pwd)/sonar-scanner-5.0.1.3006-linux/bin >> $BASH_ENV
+      - run:
+          name: Run SonarQube Scan (Frontend)
+          command: |
+            cd SecurePaymentsFrontend
+            sonar-scanner \
+              -Dsonar.host.url=$SONAR_HOST_URL \
+              -Dsonar.login=$SONAR_TOKEN \
+              -Dsonar.projectKey=secure-payments-frontend \
+              -Dsonar.projectName="Secure Payments Frontend" \
+              -Dsonar.projectVersion=1.0.0
 
 workflows:
   version: 2
@@ -84,10 +113,9 @@ workflows:
     jobs:
       - backend-validation
       - frontend-validation
-      - sonarcloud-backend:
+      - sonarqube-backend:
           requires:
             - backend-validation
-      - sonarcloud-frontend:
+      - sonarqube-frontend:
           requires:
             - frontend-validation
-
