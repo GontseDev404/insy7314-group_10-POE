@@ -1,0 +1,137 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Audit Backend Dependencies
+        working-directory: ./SecurePaymentsAPI
+        run: |
+          npm ci
+          # Run audit and check exit code
+          npm audit --audit-level=high || AUDIT_EXIT=$?
+          if [ "${AUDIT_EXIT:-0}" -ne 0 ]; then
+            echo "❌ High or critical vulnerabilities found in backend dependencies"
+            exit 1
+          fi
+          echo "✅ No high/critical vulnerabilities found in backend"
+      
+      - name: Audit Frontend Dependencies
+        working-directory: ./SecurePaymentsFrontend
+        run: |
+          npm ci
+          # Run audit and check exit code
+          npm audit --audit-level=high || AUDIT_EXIT=$?
+          if [ "${AUDIT_EXIT:-0}" -ne 0 ]; then
+            echo "❌ High or critical vulnerabilities found in frontend dependencies"
+            exit 1
+          fi
+          echo "✅ No high/critical vulnerabilities found in frontend"
+      
+      - name: Check for Hardcoded Secrets
+        run: |
+          # Check for hardcoded JWT secrets (excluding convertPfx.js which is a dev tool)
+          if grep -r "supersecret\|JWT_SECRET.*=.*[\"'][^\"']*[\"']" SecurePaymentsAPI/ --include="*.js" --exclude-dir=node_modules | grep -v "convertPfx.js"; then
+            echo "❌ Potential hardcoded secrets found. Review the code."
+            exit 1
+          fi
+          echo "✅ No hardcoded secrets detected"
+
+  backend-validation:
+    name: Backend Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install Backend Dependencies
+        working-directory: ./SecurePaymentsAPI
+        run: npm ci
+      
+      - name: Validate Backend Syntax
+        working-directory: ./SecurePaymentsAPI
+        run: |
+          node --check server.js
+          node --check db.js
+          node --check security.js
+      
+      - name: Check Environment Configuration
+        working-directory: ./SecurePaymentsAPI
+        run: |
+          if [ ! -f .env.example ]; then
+            echo "⚠️  .env.example file not found - consider creating it for documentation"
+            echo "   Required variables: JWT_SECRET, FRONTEND_URL, PORT"
+          else
+            if ! grep -q "JWT_SECRET" .env.example; then
+              echo "❌ JWT_SECRET not found in .env.example"
+              exit 1
+            fi
+            echo "✅ Environment configuration validated"
+          fi
+
+  frontend-validation:
+    name: Frontend Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install Frontend Dependencies
+        working-directory: ./SecurePaymentsFrontend
+        run: npm ci
+      
+      - name: Run ESLint
+        working-directory: ./SecurePaymentsFrontend
+        run: npm run lint
+      
+      - name: Create Dummy Certificates for Build
+        working-directory: ./SecurePaymentsAPI
+        run: |
+          mkdir -p certs
+          # Generate self-signed certificates for CI build
+          # This is needed because vite.config.js requires certificates
+          # OpenSSL is available on GitHub Actions Ubuntu runners
+          openssl req -x509 -newkey rsa:2048 -keyout certs/key.pem -out certs/cert.pem -days 1 -nodes -subj "/CN=localhost"
+          echo "✅ Dummy certificates created for CI build"
+      
+      - name: Build Frontend
+        working-directory: ./SecurePaymentsFrontend
+        run: npm run build
+        continue-on-error: false
+      
+      - name: Verify Build Output
+        working-directory: ./SecurePaymentsFrontend
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "❌ Build output directory not found"
+            exit 1
+          fi
+
