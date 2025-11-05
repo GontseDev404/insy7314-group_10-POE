@@ -2,31 +2,37 @@ import "dotenv/config";
 import bcrypt from "bcrypt";
 import dbPromise from "./db.js";
 
+// Default password from environment variable (for security)
+// Set DEFAULT_PASSWORD in .env file or it will prompt
+const DEFAULT_PASSWORD = process.env.DEFAULT_PASSWORD;
+
+if (!DEFAULT_PASSWORD) {
+    console.error("❌ ERROR: DEFAULT_PASSWORD environment variable is required!");
+    console.error("   Create a .env file with DEFAULT_PASSWORD=your-password");
+    console.error("   Or set it when running: DEFAULT_PASSWORD=your-password npm run seed");
+    process.exit(1);
+}
+
 const employees = [
     {
         email: "john.doe@company.com",
-        fullName: "John Doe",
-        password: "Employee@123"
+        fullName: "John Doe"
     },
     {
         email: "jane.smith@company.com",
-        fullName: "Jane Smith",
-        password: "Employee@123"
+        fullName: "Jane Smith"
     },
     {
         email: "michael.johnson@company.com",
-        fullName: "Michael Johnson",
-        password: "Employee@123"
+        fullName: "Michael Johnson"
     },
     {
         email: "emma.wilson@company.com",
-        fullName: "Emma Wilson",
-        password: "Employee@123"
+        fullName: "Emma Wilson"
     },
     {
         email: "david.brown@company.com",
-        fullName: "David Brown",
-        password: "Employee@123"
+        fullName: "David Brown"
     }
 ];
 
@@ -46,7 +52,7 @@ async function seedUsers() {
             }
             
             // Hash password with bcrypt (12 salt rounds)
-            const hash = await bcrypt.hash(employee.password, 12);
+            const hash = await bcrypt.hash(DEFAULT_PASSWORD, 12);
             
             // Insert user into database
             await db.run(
@@ -60,10 +66,12 @@ async function seedUsers() {
         }
         
         console.log("\n✨ Seeding completed successfully!");
-        console.log("\n📋 Sample login credentials:");
-        console.log("   Email: john.doe@company.com");
-        console.log("   Password: Employee@123");
-        console.log("\n   (All employees use the same default password: Employee@123)");
+        console.log("\n📋 Users created:");
+        employees.forEach(emp => {
+            console.log(`   - ${emp.email} (${emp.fullName})`);
+        });
+        console.log("\n⚠️  Note: All users use the password set in DEFAULT_PASSWORD environment variable");
+        console.log("   Change default passwords after first login!");
         
         await db.close();
         process.exit(0);
@@ -74,4 +82,3 @@ async function seedUsers() {
 }
 
 seedUsers();
-

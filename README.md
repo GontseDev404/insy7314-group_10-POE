@@ -79,16 +79,20 @@ Create a `.env` file in the `SecurePaymentsAPI` directory:
 
 ```bash
 cd SecurePaymentsAPI
-# Create .env file with the following content:
-JWT_SECRET=your-strong-secret-key-here
-FRONTEND_URL=https://localhost:5173
-PORT=8443
+# Copy the example file and edit it:
+cp .env.example .env
 ```
 
-**Important:** Generate a strong JWT_SECRET. You can use:
-```bash
-openssl rand -base64 32
-```
+Then edit `.env` and set the following:
+- `JWT_SECRET`: Generate a strong secret using `openssl rand -base64 32`
+- `FRONTEND_URL`: Frontend URL (default: `https://localhost:5173`)
+- `PORT`: Backend port (default: `8443`)
+- `DEFAULT_PASSWORD`: Password for seeded users (change after first login!)
+
+**Important:** 
+- Never commit the `.env` file to git
+- Generate a strong JWT_SECRET: `openssl rand -base64 32`
+- Use a strong `DEFAULT_PASSWORD` for seeded users
 
 ### Step 2: Generate SSL Certificates
 ```bash
@@ -107,14 +111,16 @@ npm install
 npm run seed
 ```
 
-This will create 5 sample employee users. Default password for all users: `Employee@123`
+This will create 5 sample employee users using the password from your `.env` file.
 
-**Sample Users:**
-- Email: `john.doe@company.com` | Password: `Employee@123`
-- Email: `jane.smith@company.com` | Password: `Employee@123`
-- Email: `michael.johnson@company.com` | Password: `Employee@123`
-- Email: `emma.wilson@company.com` | Password: `Employee@123`
-- Email: `david.brown@company.com` | Password: `Employee@123`
+**Sample Users Created:**
+- `john.doe@company.com`
+- `jane.smith@company.com`
+- `michael.johnson@company.com`
+- `emma.wilson@company.com`
+- `david.brown@company.com`
+
+**Important:** The password is set via the `DEFAULT_PASSWORD` environment variable in your `.env` file. See `.env.example` for reference.
 
 **Note:** The seed script will skip users that already exist, so you can run it multiple times safely.
 
@@ -164,12 +170,11 @@ To add new employees, edit `SecurePaymentsAPI/seed.js` and add new entries to th
 ```javascript
 {
     email: "new.employee@company.com",
-    fullName: "New Employee",
-    password: "Employee@123"
+    fullName: "New Employee"
 }
 ```
 
-Then run `npm run seed` again.
+**Note:** All employees will use the password from `DEFAULT_PASSWORD` in your `.env` file. Then run `npm run seed` again.
 
 ### SQL Seed File
 A reference SQL file (`SecurePaymentsAPI/seed.sql`) is provided for documentation purposes. The actual seeding is done via the JavaScript script to ensure proper password hashing.
@@ -282,7 +287,9 @@ To test the pipeline locally before pushing:
 After running the seed script, use these credentials:
 
 **Email:** `john.doe@company.com`  
-**Password:** `Employee@123`
+**Password:** (The password set in `DEFAULT_PASSWORD` in your `.env` file)
+
+**Important:** Change default passwords after first login!
 
 ### Sample Payment
 - **Beneficiary Name:** Olivia Smith
