@@ -1,6 +1,8 @@
 # Secure Employee International Payments Portal  
 **Developed by: Group 10**
 
+**Repository:** [https://github.com/GontseDev404/insy7314-group_10-POE](https://github.com/GontseDev404/insy7314-group_10-POE)
+
 ---
 
 ## Project Overview
