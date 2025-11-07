@@ -419,6 +419,14 @@ If ports 8443 or 5173 are already in use:
 - Change the port in `.env` (backend) or `vite.config.js` (frontend)
 - Update `FRONTEND_URL` in backend `.env` if frontend port changes
 
+
+---
+
+## YouTube Playlist 
+
+Check out the Youtube Playlist at : https://www.youtube.com/playlist?list=PLUTzmlxdRH9SunJmMxRyO_1DbGjNgKlg4 
+
+
 ---
 
 ## License
