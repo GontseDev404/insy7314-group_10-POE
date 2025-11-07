@@ -4,30 +4,34 @@ jobs:
   backend-validation:
     docker:
       - image: cimg/node:20.0
-    working_directory: ~/project/SecurePaymentsAPI
+    working_directory: ~/project
     steps:
       - checkout
       - run:
           name: Check for package.json
           command: |
-            if [ ! -f package.json ]; then
+            if [ ! -f SecurePaymentsAPI/package.json ]; then
               echo "Error: package.json not found in SecurePaymentsAPI directory"
+              ls -R
               exit 1
             fi
             echo "✓ package.json found"
-            cat package.json
+            cat SecurePaymentsAPI/package.json
       - run:
           name: Install dependencies
-          command: npm ci
+          command: |
+            cd SecurePaymentsAPI
+            npm ci
       - run:
           name: Syntax validation
           command: |
             echo "Validating JavaScript syntax..."
-            find . -name "*.js" -not -path "./node_modules/*" -exec node -c {} \;
+            find SecurePaymentsAPI -name "*.js" -not -path "*/node_modules/*" -exec node -c {} \;
             echo "✓ All JavaScript files have valid syntax"
       - run:
           name: Security audit
           command: |
+            cd SecurePaymentsAPI
             echo "Running npm audit..."
             npm audit --audit-level=moderate || true
             echo "✓ Security audit completed"
@@ -35,30 +39,38 @@ jobs:
   frontend-validation:
     docker:
       - image: cimg/node:20.0
-    working_directory: ~/project/SecurePaymentsFrontend
+    working_directory: ~/project
     steps:
       - checkout
       - run:
           name: Check for package.json
           command: |
-            if [ ! -f package.json ]; then
+            if [ ! -f SecurePaymentsFrontend/package.json ]; then
               echo "Error: package.json not found in SecurePaymentsFrontend directory"
+              ls -R
               exit 1
             fi
             echo "✓ package.json found"
-            cat package.json
+            cat SecurePaymentsFrontend/package.json
       - run:
           name: Install dependencies
-          command: npm ci
+          command: |
+            cd SecurePaymentsFrontend
+            npm ci
       - run:
           name: ESLint check
-          command: npm run lint
+          command: |
+            cd SecurePaymentsFrontend
+            npm run lint
       - run:
           name: Build frontend
-          command: npm run build
+          command: |
+            cd SecurePaymentsFrontend
+            npm run build
       - run:
           name: Security audit
           command: |
+            cd SecurePaymentsFrontend
             echo "Running npm audit..."
             npm audit --audit-level=moderate || true
             echo "✓ Security audit completed"
@@ -66,7 +78,7 @@ jobs:
   sonarqube-backend:
     docker:
       - image: cimg/node:20.0
-    working_directory: ~/project/SecurePaymentsAPI
+    working_directory: ~/project
     steps:
       - checkout
       - run:
@@ -89,10 +101,13 @@ jobs:
             echo 'export PATH="$PATH:$(pwd)/sonar-scanner-5.0.1.3006-linux/bin"' >> $BASH_ENV
       - run:
           name: Install dependencies
-          command: npm ci
+          command: |
+            cd SecurePaymentsAPI
+            npm ci
       - run:
           name: SonarQube Analysis (Backend)
           command: |
+            cd SecurePaymentsAPI
             # Build project key with organization if provided
             if [ -n "${SONAR_ORG_KEY}" ]; then
               PROJECT_KEY="${SONAR_ORG_KEY}_secure-payments-api"
@@ -111,7 +126,7 @@ jobs:
   sonarqube-frontend:
     docker:
       - image: cimg/node:20.0
-    working_directory: ~/project/SecurePaymentsFrontend
+    working_directory: ~/project
     steps:
       - checkout
       - run:
@@ -134,10 +149,13 @@ jobs:
             echo 'export PATH="$PATH:$(pwd)/sonar-scanner-5.0.1.3006-linux/bin"' >> $BASH_ENV
       - run:
           name: Install dependencies
-          command: npm ci
+          command: |
+            cd SecurePaymentsFrontend
+            npm ci
       - run:
           name: SonarQube Analysis (Frontend)
           command: |
+            cd SecurePaymentsFrontend
             # Build project key with organization if provided
             if [ -n "${SONAR_ORG_KEY}" ]; then
               PROJECT_KEY="${SONAR_ORG_KEY}_secure-payments-frontend"
