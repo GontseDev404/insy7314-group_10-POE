@@ -27,7 +27,7 @@ All backend traffic is served over HTTPS, and comprehensive security measures ar
 | Backend | Node.js, Express.js, SQLite3 |
 | Security | bcrypt, helmet, express-validator, csurf, express-rate-limit |
 | Networking | HTTPS (SSL Certificates) |
-| CI/CD | CircleCI with SonarQube |
+| CI/CD | CircleCI with SonarCloud |
 | Version Control | Git, GitHub |
 
 ---
@@ -144,6 +144,8 @@ npm run dev
 Once started, the frontend will be available at:
 **https://localhost:5173**
 
+> If the HTTPS certificates in `SecurePaymentsAPI/certs/` are missing, the dev server automatically falls back to HTTP on port 5173 and logs a warning.
+
 ---
 
 ## Static User Seeding
@@ -183,7 +185,8 @@ A reference SQL file (`SecurePaymentsAPI/seed.sql`) is provided for documentatio
 
 ## DevSecOps Pipeline
 
-This project uses **CircleCI** for continuous integration and **SonarQube** for code quality analysis.
+This project uses **CircleCI** for continuous integration and **SonarCloud** for automated code-quality analysis (no local server required).  
+For a quick setup guide, see `SONARCLOUD_QUICK_START.md`; detailed instructions live in `SONARCLOUD_SETUP.md`.
 
 ### CircleCI Pipeline
 
@@ -223,9 +226,9 @@ The CircleCI pipeline (`.circleci/config.yml`) performs the following checks:
    - The pipeline will automatically run on every push to `main` or `master` branch
    - View results in the CircleCI dashboard
 
-### Setting Up Self-Hosted SonarQube
+### Optional: Self-Hosted SonarQube
 
-This project is configured for **self-hosted SonarQube**. Follow these steps to set it up:
+If you prefer to run your own SonarQube instance instead of SonarCloud, the project still supports it. Follow these steps:
 
 #### Step 1: Install SonarQube Server
 
