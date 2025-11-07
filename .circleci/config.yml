@@ -70,6 +70,17 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Check SonarQube Configuration
+          command: |
+            if [ -z "${SONAR_HOST_URL}" ] || [ -z "${SONAR_TOKEN}" ]; then
+              echo "⚠️  SonarQube environment variables not set. Skipping SonarQube analysis."
+              echo "To enable SonarQube analysis, set the following in CircleCI project settings:"
+              echo "  - SONAR_HOST_URL: Your SonarQube server URL"
+              echo "  - SONAR_TOKEN: Your SonarQube authentication token"
+              echo "See README.md for setup instructions."
+              circleci-agent step halt
+            fi
+      - run:
           name: Install SonarQube Scanner
           command: |
             curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
@@ -82,10 +93,16 @@ jobs:
       - run:
           name: SonarQube Analysis (Backend)
           command: |
+            # Build project key with organization if provided
+            if [ -n "${SONAR_ORG_KEY}" ]; then
+              PROJECT_KEY="${SONAR_ORG_KEY}_secure-payments-api"
+            else
+              PROJECT_KEY="secure-payments-api"
+            fi
             sonar-scanner \
               -Dsonar.host.url="${SONAR_HOST_URL}" \
               -Dsonar.login="${SONAR_TOKEN}" \
-              -Dsonar.projectKey=secure-payments-api \
+              -Dsonar.projectKey="${PROJECT_KEY}" \
               -Dsonar.projectName="Secure Payments API" \
               -Dsonar.sources=. \
               -Dsonar.exclusions="node_modules/**,**/node_modules/**,certs/**,*.db,*.log" \
@@ -97,6 +114,17 @@ jobs:
     working_directory: ~/project/SecurePaymentsFrontend
     steps:
       - checkout
+      - run:
+          name: Check SonarQube Configuration
+          command: |
+            if [ -z "${SONAR_HOST_URL}" ] || [ -z "${SONAR_TOKEN}" ]; then
+              echo "⚠️  SonarQube environment variables not set. Skipping SonarQube analysis."
+              echo "To enable SonarQube analysis, set the following in CircleCI project settings:"
+              echo "  - SONAR_HOST_URL: Your SonarQube server URL"
+              echo "  - SONAR_TOKEN: Your SonarQube authentication token"
+              echo "See README.md for setup instructions."
+              circleci-agent step halt
+            fi
       - run:
           name: Install SonarQube Scanner
           command: |
@@ -110,10 +138,16 @@ jobs:
       - run:
           name: SonarQube Analysis (Frontend)
           command: |
+            # Build project key with organization if provided
+            if [ -n "${SONAR_ORG_KEY}" ]; then
+              PROJECT_KEY="${SONAR_ORG_KEY}_secure-payments-frontend"
+            else
+              PROJECT_KEY="secure-payments-frontend"
+            fi
             sonar-scanner \
               -Dsonar.host.url="${SONAR_HOST_URL}" \
               -Dsonar.login="${SONAR_TOKEN}" \
-              -Dsonar.projectKey=secure-payments-frontend \
+              -Dsonar.projectKey="${PROJECT_KEY}" \
               -Dsonar.projectName="Secure Payments Frontend" \
               -Dsonar.sources=src \
               -Dsonar.exclusions="node_modules/**,dist/**,build/**,**/node_modules/**,public/**" \
