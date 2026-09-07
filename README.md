@@ -1,4 +1,4 @@
-# Secure Employee International Payments Portal  
+# Employee International Payments Portal — Group 10 academic project
 **Developed by: Group 10**
 
 **Repository:** [https://github.com/GontseDev404/insy7314-group_10-POE](https://github.com/GontseDev404/insy7314-group_10-POE)
@@ -6,16 +6,16 @@
 ---
 
 ## Project Overview
-This project is a secure employee-only international payments portal built using React for the frontend and Node.js with Express for the backend.  
+This project is an employee-only international payments workflow demonstrator built using React for the frontend and Node.js with Express for the backend. It was developed as a group academic project and is documented as a local demonstrator, not as a live payments service or production security certification.
 
 The system enables authorized employees to:
-- Log in securely using pre-created accounts with hashed and salted passwords
+- Log in using pre-created accounts with bcrypt-hashed passwords
 - Submit international payments with validated IBAN, SWIFT, and currency inputs
 - View a transaction dashboard listing all processed payments
 
 **Note:** User registration is disabled. All users are pre-created by administrators. See the "Static User Seeding" section below.
 
-All backend traffic is served over HTTPS, and comprehensive security measures are implemented to protect user data and communication.
+Local development serves the backend over HTTPS using self-signed certificates. The source includes security controls such as input validation, rate limiting, CSRF protection, Helmet middleware and parameterised SQLite queries; these are implementation evidence, not an independent security audit or production compliance claim.
 
 ---
 
@@ -25,7 +25,7 @@ All backend traffic is served over HTTPS, and comprehensive security measures ar
 |--------|--------------------|
 | Frontend | React, Vite, CSS |
 | Backend | Node.js, Express.js, SQLite3 |
-| Security | bcrypt, helmet, express-validator, csurf, express-rate-limit |
+| Security controls | bcrypt, Helmet, express-validator, csurf, express-rate-limit |
 | Networking | HTTPS (SSL Certificates) |
 | CI/CD | CircleCI with SonarCloud |
 | Version Control | Git, GitHub |
@@ -34,8 +34,8 @@ All backend traffic is served over HTTPS, and comprehensive security measures ar
 
 ## Security Features Implemented
 
-### Password Security
-- **Password Hashing & Salting**: Uses bcrypt with 12 salt rounds to securely hash and store user passwords
+### Password handling
+- **Password Hashing & Salting**: Uses bcrypt with 12 salt rounds to hash and store user passwords
 - **No Plain Text Storage**: All passwords are hashed before storage in the database
 
 ### Input Validation (Whitelisting)
@@ -43,25 +43,26 @@ All backend traffic is served over HTTPS, and comprehensive security measures ar
 - **Patterns Defined**: Email, full name, password, beneficiary name, SWIFT code, IBAN, amount, currency, and reference fields all use whitelist patterns
 - **See**: `SecurePaymentsAPI/security.js` for all validation patterns
 
-### SSL/HTTPS Traffic
-- **All Traffic Encrypted**: Backend served securely using self-signed SSL certificates
-- **HTTPS Only**: All API endpoints require HTTPS (port 8443)
-- **Certificate Setup**: See "How to Run the Project Locally" section below
+### Local SSL/HTTPS traffic
+- **Local HTTPS**: The backend is served over HTTPS using self-signed certificates
+- **HTTPS endpoint**: Local API endpoints use port 8443
+- **Boundary**: Self-signed local certificates do not establish production TLS, public availability, or compliance
+- **Certificate setup**: See "How to Run the Project Locally" below
 
 ### Attack Protection
 
 | Attack Type | Protection Method | Status |
 |------------|------------------|--------|
-| **XSS (Cross-Site Scripting)** | Helmet middleware with XSS filter and content-type-options | ✅ Protected |
-| **SQL Injection** | Parameterized queries in all database operations | ✅ Protected |
-| **CSRF (Cross-Site Request Forgery)** | csurf middleware with token validation on all POST requests | ✅ Protected |
-| **Brute Force** | express-rate-limit (200 requests per 10 minutes per IP) | ✅ Protected |
-| **Clickjacking** | Helmet X-Frame-Options header | ✅ Protected |
-| **MIME Sniffing** | Helmet content-type-options header | ✅ Protected |
+| **XSS (Cross-Site Scripting)** | Helmet middleware with content-type-options and related headers | Implemented control; not independently audited |
+| **SQL Injection** | Parameterised queries in the inspected database operations | Implemented control; not independently audited |
+| **CSRF (Cross-Site Request Forgery)** | csurf middleware with token validation on POST requests | Implemented control; not independently audited |
+| **Brute Force** | express-rate-limit (200 requests per 10 minutes per IP) | Implemented control; not independently audited |
+| **Clickjacking** | Helmet X-Frame-Options header | Implemented control; not independently audited |
+| **MIME Sniffing** | Helmet content-type-options header | Implemented control; not independently audited |
 
 ### Additional Security Measures
 - **CORS Whitelisting**: Only trusted origins are allowed access to the API
-- **JWT Authentication**: Secure sessions handled with JSON Web Tokens and HTTP-only cookies
+- **JWT Authentication**: Sessions use JSON Web Tokens in an HTTP-only cookie; the separate CSRF cookie is intentionally JavaScript-readable for this local frontend flow
 - **Security Event Logging**: All login attempts and payment creations are logged
 - **Input Sanitization**: All inputs are trimmed and sanitized before processing
 
@@ -410,6 +411,7 @@ If you see SSL certificate errors in the browser:
 - This is normal for self-signed certificates
 - Click "Advanced" and "Proceed to localhost" (or equivalent)
 - For production, use proper CA-signed certificates
+- This repository is a group academic/local demonstrator; do not connect it to real payment networks or real customer data without a separate security review and production hardening pass
 
 ### Database Errors
 If you encounter database errors:
